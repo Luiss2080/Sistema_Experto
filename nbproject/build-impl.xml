@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Sistema_Experto-impl" default="default" basedir="..">
+    <fail message="Please build using Ant 1.8.0 or higher.">
+        <condition>
+            <not>
+                <antversion atleast="1.8.0"/>
+            </not>
+        </condition>
+    </fail>
+    <target name="default" depends="test,jar,javadoc"/>
+    <target name="pre-init">
+        <property file="nbproject/private/config.properties"/>
+        <property file="nbproject/private/configs/${config}.properties"/>
+        <property file="nbproject/private/private.properties"/>
+        <property file="nbproject/project.properties"/>
+        <fail unless="java.home">Must set java.home</fail>
+        <property name="javac.fork" value="true"/>
+        <property name="platform.java" value="${java.home}/bin/java"/>
+        <property name="platform.javac" value="${java.home}/bin/javac"/>
+        <available file="${manifest.file}" property="manifest.available"/>
+        <condition property="main.class.available">
+            <and>
+                <isset property="main.class"/>
+                <not>
+                    <equals arg1="${main.class}" arg2="" trim="true"/>
+                </not>
+            </and>
+        </condition>
+        <property name="build.dir" location="build"/>
+        <property name="build.classes.dir" location="${build.dir}/classes"/>
+        <property name="build.test.classes.dir" location="${build.dir}/test/classes"/>
+        <property name="build.test.results.dir" location="${build.dir}/test/results"/>
+        <property name="src.dir" location="src"/>
+        <property name="test.src.dir" location="test"/>
+        <property name="dist.dir" location="dist"/>
+        <property name="dist.jar" location="${dist.dir}/${ant.project.name}.jar"/>
+    </target>
+    <target name="init" depends="pre-init">
+        <mkdir dir="${build.dir}"/>
+    </target>
+    <target name="deps-clean" depends="init"/>
+    <target name="compile" depends="init,deps-clean">
+        <mkdir dir="${build.classes.dir}"/>
+        <javac debug="true" deprecation="false" destdir="${build.classes.dir}"
+               fork="${javac.fork}" includeantruntime="false" source="${javac.source}"
+               srcdir="${src.dir}" target="${javac.target}">
+            <classpath path="${javac.classpath}"/>
+        </javac>
+        <copy todir="${build.classes.dir}">
+            <fileset dir="${src.dir}" excludes="${build.classes.excludes}"/>
+        </copy>
+    </target>
+    <target name="compile-test" depends="compile">
+        <mkdir dir="${build.test.classes.dir}"/>
+        <javac debug="true" deprecation="false" destdir="${build.test.classes.dir}"
+               fork="${javac.fork}" includeantruntime="false" source="${javac.source}"
+               srcdir="${test.src.dir}" target="${javac.target}">
+            <classpath path="${javac.test.classpath}"/>
+        </javac>
+        <copy todir="${build.test.classes.dir}">
+            <fileset dir="${test.src.dir}" excludes="${build.classes.excludes}"/>
+        </copy>
+    </target>
+    <target name="test" depends="compile-test">
+        <mkdir dir="${build.test.results.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr" showoutput="true">
+            <formatter type="brief" usefile="false"/>
+            <formatter type="xml"/>
+            <test name="**/*Test" todir="${build.test.results.dir}"/>
+            <classpath path="${run.test.classpath}"/>
+        </junit>
+    </target>
+    <target name="jar" depends="compile">
+        <mkdir dir="${dist.dir}"/>
+        <jar compress="${jar.compress}" jarfile="${dist.jar}">
+            <fileset dir="${build.classes.dir}"/>
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}"/>
+            </manifest>
+        </jar>
+    </target>
+    <target name="run" depends="jar">
+        <java classname="${main.class}" fork="true">
+            <classpath path="${run.classpath}"/>
+        </java>
+    </target>
+    <target name="javadoc" depends="init">
+        <mkdir dir="${dist.dir}/javadoc"/>
+        <javadoc destdir="${dist.dir}/javadoc" source="${javac.source}">
+            <classpath path="${javac.classpath}"/>
+            <fileset dir="${src.dir}" includes="**/*.java"/>
+        </javadoc>
+    </target>
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+</project>

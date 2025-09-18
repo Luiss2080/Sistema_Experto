@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Sistema_Experto" default="default" basedir=".">
+    <description>Builds, tests, and runs the project Sistema_Experto.</description>
+    <import file="nbproject/build-impl.xml"/>
+
+    <target name="default" depends="jar"/>
+
+    <target name="run" depends="jar">
+        <java jar="${dist.jar}" fork="true"/>
+    </target>
+</project>
