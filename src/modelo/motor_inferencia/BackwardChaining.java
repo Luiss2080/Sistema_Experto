@@ -100,23 +100,156 @@ public class BackwardChaining implements MotorInferencia {
 
     private boolean demostrarCondicion(String condicion, List<Hecho> hechos,
                                      List<Regla> reglas, Set<String> visitados) {
-        for (Hecho hecho : hechos) {
-            if (condicion.contains(hecho.getPremisaNombre()) &&
-                condicion.contains(hecho.getValor())) {
-                return true;
+        // Usar la misma lógica de evaluación que las reglas
+        if (evaluarCondicionDirecta(condicion, hechos)) {
+            return true;
+        }
+
+        // Si no se puede evaluar directamente, intentar demostrar como subobjetivo
+        String premisaObjetivo = extraerPremisaDeCondicion(condicion);
+        if (premisaObjetivo != null && !visitados.contains(premisaObjetivo)) {
+            Objetivo subObjetivo = new Objetivo();
+            subObjetivo.setNombre(premisaObjetivo);
+            return demostrarObjetivo(subObjetivo, hechos, reglas, visitados);
+        }
+
+        return false;
+    }
+
+    private boolean evaluarCondicionDirecta(String condicion, List<Hecho> hechos) {
+        condicion = condicion.trim();
+
+        // Usar la misma lógica de evaluación de condiciones que en Regla
+        if (condicion.contains(" = ")) {
+            String[] partes = condicion.split(" = ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarIgualdad(premisa, valorEsperado, hechos);
+            }
+        } else if (condicion.contains(" > ")) {
+            String[] partes = condicion.split(" > ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarMayorQue(premisa, valorEsperado, hechos);
+            }
+        } else if (condicion.contains(" < ")) {
+            String[] partes = condicion.split(" < ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarMenorQue(premisa, valorEsperado, hechos);
+            }
+        } else if (condicion.contains(" >= ")) {
+            String[] partes = condicion.split(" >= ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarMayorIgualQue(premisa, valorEsperado, hechos);
+            }
+        } else if (condicion.contains(" <= ")) {
+            String[] partes = condicion.split(" <= ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarMenorIgualQue(premisa, valorEsperado, hechos);
             }
         }
 
-        Objetivo subObjetivo = new Objetivo();
-        subObjetivo.setNombre(extraerObjetivoDeCondicion(condicion));
-
-        return demostrarObjetivo(subObjetivo, hechos, reglas, visitados);
+        return false;
     }
 
-    private String extraerObjetivoDeCondicion(String condicion) {
-        String[] partes = condicion.split("=");
-        return partes.length > 0 ? partes[0].trim() : condicion;
+    private boolean verificarIgualdad(String premisa, String valorEsperado, List<Hecho> hechos) {
+        for (Hecho hecho : hechos) {
+            if (hecho.getPremisaNombre().equals(premisa)) {
+                String valorHecho = hecho.getValor().toLowerCase().trim();
+                String valorEsp = valorEsperado.toLowerCase().trim();
+
+                if (valorEsp.equals("true") || valorEsp.equals("false")) {
+                    return normalizarBooleano(valorHecho).equals(valorEsp);
+                }
+
+                return valorHecho.equals(valorEsp);
+            }
+        }
+        return false;
     }
+
+    private boolean verificarMayorQue(String premisa, String valorEsperado, List<Hecho> hechos) {
+        return compararNumericamente(premisa, valorEsperado, hechos, ">");
+    }
+
+    private boolean verificarMenorQue(String premisa, String valorEsperado, List<Hecho> hechos) {
+        return compararNumericamente(premisa, valorEsperado, hechos, "<");
+    }
+
+    private boolean verificarMayorIgualQue(String premisa, String valorEsperado, List<Hecho> hechos) {
+        return compararNumericamente(premisa, valorEsperado, hechos, ">=");
+    }
+
+    private boolean verificarMenorIgualQue(String premisa, String valorEsperado, List<Hecho> hechos) {
+        return compararNumericamente(premisa, valorEsperado, hechos, "<=");
+    }
+
+    private boolean compararNumericamente(String premisa, String valorEsperado, List<Hecho> hechos, String operador) {
+        try {
+            double valorNumericoEsperado = Double.parseDouble(valorEsperado);
+
+            for (Hecho hecho : hechos) {
+                if (hecho.getPremisaNombre().equals(premisa)) {
+                    try {
+                        double valorNumericoHecho = Double.parseDouble(hecho.getValor());
+
+                        switch (operador) {
+                            case ">":
+                                return valorNumericoHecho > valorNumericoEsperado;
+                            case "<":
+                                return valorNumericoHecho < valorNumericoEsperado;
+                            case ">=":
+                                return valorNumericoHecho >= valorNumericoEsperado;
+                            case "<=":
+                                return valorNumericoHecho <= valorNumericoEsperado;
+                        }
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                }
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return false;
+    }
+
+    private String normalizarBooleano(String valor) {
+        valor = valor.toLowerCase().trim();
+        if (valor.equals("sí") || valor.equals("si") || valor.equals("s") || valor.equals("1")) {
+            return "true";
+        } else if (valor.equals("no") || valor.equals("n") || valor.equals("0")) {
+            return "false";
+        }
+        return valor;
+    }
+
+    private String extraerPremisaDeCondicion(String condicion) {
+        condicion = condicion.trim();
+
+        if (condicion.contains(" = ")) {
+            return condicion.split(" = ")[0].trim();
+        } else if (condicion.contains(" > ")) {
+            return condicion.split(" > ")[0].trim();
+        } else if (condicion.contains(" < ")) {
+            return condicion.split(" < ")[0].trim();
+        } else if (condicion.contains(" >= ")) {
+            return condicion.split(" >= ")[0].trim();
+        } else if (condicion.contains(" <= ")) {
+            return condicion.split(" <= ")[0].trim();
+        }
+
+        return null;
+    }
+
 
     @Override
     public void establecerEstrategia(EstrategiaInferencia estrategia) {

@@ -70,16 +70,48 @@ public class EditorBaseConocimiento extends JDialog {
         JScrollPane scrollDescripcion = new JScrollPane(txtDescripcion);
         panelDatos.add(scrollDescripcion, gbc);
 
-        JPanel panelGestion = new JPanel(new FlowLayout());
+        // Panel de gestión con guía paso a paso
+        JPanel panelGestion = new JPanel(new BorderLayout());
+        panelGestion.setBorder(BorderFactory.createTitledBorder("Configuración de la Base de Conocimiento"));
+
+        // Panel de instrucciones
+        JTextArea txtInstrucciones = new JTextArea();
+        txtInstrucciones.setEditable(false);
+        txtInstrucciones.setBackground(getBackground());
+        txtInstrucciones.setFont(new Font("Arial", Font.PLAIN, 12));
+        txtInstrucciones.setText("Para que la base funcione correctamente, debe completar los siguientes pasos:\n\n" +
+                                "1. PREMISAS: Variables que el cliente ingresará como datos\n" +
+                                "2. OBJETIVOS: Metas o conclusiones que el sistema debe alcanzar\n" +
+                                "3. REGLAS: Lógica que conecta premisas con objetivos\n\n" +
+                                "Solo las bases completas aparecerán disponibles para los clientes.");
+        JScrollPane scrollInstrucciones = new JScrollPane(txtInstrucciones);
+        scrollInstrucciones.setPreferredSize(new Dimension(450, 100));
+
+        // Panel de botones con indicadores de estado
+        JPanel panelBotonesGestion = new JPanel(new GridLayout(3, 1, 5, 5));
+
         btnGestionPremisas = new JButton("Gestionar Premisas");
         btnGestionObjetivos = new JButton("Gestionar Objetivos");
         btnGestionReglas = new JButton("Gestionar Reglas");
+
+        // Configurar apariencia inicial
+        configurarBotonGestion(btnGestionPremisas);
+        configurarBotonGestion(btnGestionObjetivos);
+        configurarBotonGestion(btnGestionReglas);
 
         btnGestionPremisas.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (baseConocimiento != null) {
-                    new GestionPremisas(EditorBaseConocimiento.this, baseConocimiento).setVisible(true);
+                    GestionPremisasCompleta ventana = new GestionPremisasCompleta(EditorBaseConocimiento.this, baseConocimiento);
+                    ventana.setVisible(true);
+                    // Actualizar estado después de cerrar la ventana
+                    ventana.addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
+                        public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                            actualizarEstadoBotones();
+                        }
+                    });
                 } else {
                     JOptionPane.showMessageDialog(EditorBaseConocimiento.this,
                         "Debe guardar la base primero", "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -91,7 +123,14 @@ public class EditorBaseConocimiento extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (baseConocimiento != null) {
-                    new GestionObjetivos(EditorBaseConocimiento.this, baseConocimiento).setVisible(true);
+                    GestionObjetivosCompleta ventana = new GestionObjetivosCompleta(EditorBaseConocimiento.this, baseConocimiento);
+                    ventana.setVisible(true);
+                    ventana.addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
+                        public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                            actualizarEstadoBotones();
+                        }
+                    });
                 } else {
                     JOptionPane.showMessageDialog(EditorBaseConocimiento.this,
                         "Debe guardar la base primero", "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -103,7 +142,14 @@ public class EditorBaseConocimiento extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (baseConocimiento != null) {
-                    new GestionReglas(EditorBaseConocimiento.this, baseConocimiento).setVisible(true);
+                    GestionReglasCompleta ventana = new GestionReglasCompleta(EditorBaseConocimiento.this, baseConocimiento);
+                    ventana.setVisible(true);
+                    ventana.addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
+                        public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                            actualizarEstadoBotones();
+                        }
+                    });
                 } else {
                     JOptionPane.showMessageDialog(EditorBaseConocimiento.this,
                         "Debe guardar la base primero", "Aviso", JOptionPane.WARNING_MESSAGE);
@@ -111,9 +157,12 @@ public class EditorBaseConocimiento extends JDialog {
             }
         });
 
-        panelGestion.add(btnGestionPremisas);
-        panelGestion.add(btnGestionObjetivos);
-        panelGestion.add(btnGestionReglas);
+        panelBotonesGestion.add(btnGestionPremisas);
+        panelBotonesGestion.add(btnGestionObjetivos);
+        panelBotonesGestion.add(btnGestionReglas);
+
+        panelGestion.add(scrollInstrucciones, BorderLayout.NORTH);
+        panelGestion.add(panelBotonesGestion, BorderLayout.CENTER);
 
         JPanel panelBotones = new JPanel(new FlowLayout());
         btnGuardar = new JButton("Guardar");
@@ -147,6 +196,7 @@ public class EditorBaseConocimiento extends JDialog {
         if (baseConocimiento != null) {
             txtNombre.setText(baseConocimiento.getNombre());
             txtDescripcion.setText(baseConocimiento.getDescripcion());
+            actualizarEstadoBotones();
         }
     }
 
@@ -193,14 +243,78 @@ public class EditorBaseConocimiento extends JDialog {
             btnGestionObjetivos.setEnabled(true);
             btnGestionReglas.setEnabled(true);
 
-            // Actualizar título para reflejar que ya no es nueva
+            // Actualizar estado de botones y título
+            actualizarEstadoBotones();
+
+            // Si es nueva, cambiar título
             if (esNueva) {
                 esNueva = false;
-                setTitle("Editar Base de Conocimiento: " + baseConocimiento.getNombre());
             }
         } else {
             JOptionPane.showMessageDialog(this, "Error al guardar la base",
                 "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Configura la apariencia inicial de un botón de gestión
+     */
+    private void configurarBotonGestion(JButton boton) {
+        boton.setPreferredSize(new Dimension(300, 40));
+        boton.setHorizontalAlignment(SwingConstants.LEFT);
+        boton.setFont(new Font("Arial", Font.BOLD, 12));
+    }
+
+    /**
+     * Actualiza el estado visual de los botones según el contenido de la base
+     */
+    private void actualizarEstadoBotones() {
+        if (baseConocimiento == null) return;
+
+        // Actualizar botón de premisas
+        if (baseConocimiento.getPremisas().isEmpty()) {
+            btnGestionPremisas.setText("Gestionar Premisas (VACÍO - Requerido)");
+            btnGestionPremisas.setBackground(new Color(255, 235, 235));
+            btnGestionPremisas.setForeground(new Color(139, 0, 0));
+        } else {
+            btnGestionPremisas.setText("Gestionar Premisas (" + baseConocimiento.getPremisas().size() + " definidas)");
+            btnGestionPremisas.setBackground(new Color(235, 255, 235));
+            btnGestionPremisas.setForeground(new Color(0, 100, 0));
+        }
+
+        // Actualizar botón de objetivos
+        if (baseConocimiento.getObjetivos().isEmpty()) {
+            btnGestionObjetivos.setText("Gestionar Objetivos (VACÍO - Requerido)");
+            btnGestionObjetivos.setBackground(new Color(255, 235, 235));
+            btnGestionObjetivos.setForeground(new Color(139, 0, 0));
+        } else {
+            btnGestionObjetivos.setText("Gestionar Objetivos (" + baseConocimiento.getObjetivos().size() + " definidos)");
+            btnGestionObjetivos.setBackground(new Color(235, 255, 235));
+            btnGestionObjetivos.setForeground(new Color(0, 100, 0));
+        }
+
+        // Actualizar botón de reglas
+        if (baseConocimiento.getReglas().isEmpty()) {
+            btnGestionReglas.setText("Gestionar Reglas (VACÍO - Requerido)");
+            btnGestionReglas.setBackground(new Color(255, 235, 235));
+            btnGestionReglas.setForeground(new Color(139, 0, 0));
+        } else {
+            btnGestionReglas.setText("Gestionar Reglas (" + baseConocimiento.getReglas().size() + " definidas)");
+            btnGestionReglas.setBackground(new Color(235, 255, 235));
+            btnGestionReglas.setForeground(new Color(0, 100, 0));
+        }
+
+        // Actualizar título de la ventana con estado general
+        boolean esCompleta = !baseConocimiento.getPremisas().isEmpty() &&
+                           !baseConocimiento.getObjetivos().isEmpty() &&
+                           !baseConocimiento.getReglas().isEmpty();
+
+        if (esCompleta) {
+            setTitle("Editor de Base de Conocimiento: " + baseConocimiento.getNombre() + " (COMPLETA)");
+        } else {
+            setTitle("Editor de Base de Conocimiento: " + baseConocimiento.getNombre() + " (INCOMPLETA)");
+        }
+
+        repaint();
     }
 }

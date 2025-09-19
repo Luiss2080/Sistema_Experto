@@ -26,6 +26,15 @@ public class MotorInferenciaAvanzado implements MotorInferencia {
         this.contadorPasos = 0;
     }
 
+    private void inicializar() {
+        this.conclusiones.clear();
+        this.explicacionDetallada.setLength(0);
+        this.pasosInferencia.clear();
+        this.factoresCerteza.clear();
+        this.reglasProcesadas.clear();
+        this.contadorPasos = 0;
+    }
+
     @Override
     public List<String> ejecutar(List<Hecho> hechos, List<Regla> reglas, List<Objetivo> objetivos) {
         inicializar();
@@ -42,6 +51,15 @@ public class MotorInferenciaAvanzado implements MotorInferencia {
             explicacionDetallada.append("• ").append(hecho.toString()).append("\n");
         }
         explicacionDetallada.append("\n");
+
+        // Validar datos de entrada
+        if (hechos.isEmpty()) {
+            explicacionDetallada.append("ADVERTENCIA: No hay hechos iniciales para procesar.\n");
+        }
+        if (reglas.isEmpty()) {
+            explicacionDetallada.append("ADVERTENCIA: No hay reglas disponibles para aplicar.\n");
+            return conclusiones;
+        }
 
         List<Hecho> baseDatos = new ArrayList<>(hechos);
 
@@ -64,15 +82,6 @@ public class MotorInferenciaAvanzado implements MotorInferencia {
         generarResumenFinal();
 
         return new ArrayList<>(conclusiones);
-    }
-
-    private void inicializar() {
-        conclusiones.clear();
-        explicacionDetallada.setLength(0);
-        pasosInferencia.clear();
-        factoresCerteza.clear();
-        reglasProcesadas.clear();
-        contadorPasos = 0;
     }
 
     private void ejecutarAmplitudPrimero(List<Hecho> baseDatos, List<Regla> reglas, List<Objetivo> objetivos) {

@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import modelo.entidades.Usuario;
 import vista.formularios.GestorArchivos;
-import vista.comun.InfoSistema;
 
 public class MenuAdministrador extends JFrame {
     private Usuario usuario;
@@ -39,7 +38,12 @@ public class MenuAdministrador extends JFrame {
             gestor.setVisible(true);
         });
 
-        JMenuItem itemSalir = new JMenuItem("Salir");
+        JMenuItem itemLogout = new JMenuItem("Cambiar Usuario");
+        itemLogout.addActionListener(e -> {
+            volverAlLogin();
+        });
+
+        JMenuItem itemSalir = new JMenuItem("Salir del Sistema");
         itemSalir.addActionListener(e -> {
             dispose();
             System.exit(0);
@@ -47,6 +51,7 @@ public class MenuAdministrador extends JFrame {
 
         menuArchivo.add(itemGestorArchivos);
         menuArchivo.addSeparator();
+        menuArchivo.add(itemLogout);
         menuArchivo.add(itemSalir);
 
         // Menú Herramientas
@@ -64,15 +69,9 @@ public class MenuAdministrador extends JFrame {
                 "Función en desarrollo", "Info", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        JMenuItem itemInfoSistema = new JMenuItem("Información del Sistema");
-        itemInfoSistema.addActionListener(e -> {
-            InfoSistema.mostrar(this, usuario);
-        });
 
         menuHerramientas.add(itemConfiguracion);
         menuHerramientas.add(itemReportes);
-        menuHerramientas.addSeparator();
-        menuHerramientas.add(itemInfoSistema);
 
         // Menú Ayuda
         JMenu menuAyuda = new JMenu("Ayuda");
@@ -101,14 +100,15 @@ public class MenuAdministrador extends JFrame {
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 16));
         panelTitulo.add(lblTitulo);
 
-        JPanel panelBotones = new JPanel(new GridLayout(5, 1, 10, 10));
+        JPanel panelBotones = new JPanel(new GridLayout(6, 1, 10, 10));
         panelBotones.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
         btnGestionBases = new JButton("Gestión de Bases de Conocimiento");
         btnGestionUsuarios = new JButton("Gestión de Usuarios");
         btnConfiguracion = new JButton("Configuración del Sistema");
         btnReportes = new JButton("Reportes y Estadísticas");
-        btnSalir = new JButton("Salir");
+        JButton btnLogout = new JButton("Cambiar Usuario");
+        btnSalir = new JButton("Salir del Sistema");
 
         btnGestionBases.addActionListener(new ActionListener() {
             @Override
@@ -141,6 +141,13 @@ public class MenuAdministrador extends JFrame {
             }
         });
 
+        btnLogout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                volverAlLogin();
+            }
+        });
+
         btnSalir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -153,11 +160,29 @@ public class MenuAdministrador extends JFrame {
         panelBotones.add(btnGestionUsuarios);
         panelBotones.add(btnConfiguracion);
         panelBotones.add(btnReportes);
+        panelBotones.add(btnLogout);
         panelBotones.add(btnSalir);
 
         panelPrincipal.add(panelTitulo, BorderLayout.NORTH);
         panelPrincipal.add(panelBotones, BorderLayout.CENTER);
 
         add(panelPrincipal);
+    }
+
+    private void volverAlLogin() {
+        int respuesta = JOptionPane.showConfirmDialog(this,
+            "¿Está seguro de que desea cambiar de usuario?\n" +
+            "Volverá a la pantalla de login.",
+            "Cambiar Usuario",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE);
+
+        if (respuesta == JOptionPane.YES_OPTION) {
+            dispose();
+            SwingUtilities.invokeLater(() -> {
+                vista.login.LoginPrincipal login = new vista.login.LoginPrincipal();
+                login.setVisible(true);
+            });
+        }
     }
 }

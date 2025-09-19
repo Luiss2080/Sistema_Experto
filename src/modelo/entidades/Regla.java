@@ -26,20 +26,135 @@ public class Regla implements Serializable {
     }
 
     public boolean evaluarCondiciones(List<Hecho> hechos) {
+        if (condiciones.isEmpty()) {
+            return false;
+        }
+
         for (String condicion : condiciones) {
-            boolean cumplida = false;
-            for (Hecho hecho : hechos) {
-                if (condicion.contains(hecho.getPremisaNombre()) &&
-                    condicion.contains(hecho.getValor())) {
-                    cumplida = true;
-                    break;
-                }
-            }
-            if (!cumplida) {
+            if (!evaluarCondicionIndividual(condicion, hechos)) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean evaluarCondicionIndividual(String condicion, List<Hecho> hechos) {
+        condicion = condicion.trim();
+
+        // Buscar operadores de comparación
+        if (condicion.contains(" = ")) {
+            String[] partes = condicion.split(" = ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarIgualdad(premisa, valorEsperado, hechos);
+            }
+        } else if (condicion.contains(" > ")) {
+            String[] partes = condicion.split(" > ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarMayorQue(premisa, valorEsperado, hechos);
+            }
+        } else if (condicion.contains(" < ")) {
+            String[] partes = condicion.split(" < ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarMenorQue(premisa, valorEsperado, hechos);
+            }
+        } else if (condicion.contains(" >= ")) {
+            String[] partes = condicion.split(" >= ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarMayorIgualQue(premisa, valorEsperado, hechos);
+            }
+        } else if (condicion.contains(" <= ")) {
+            String[] partes = condicion.split(" <= ");
+            if (partes.length == 2) {
+                String premisa = partes[0].trim();
+                String valorEsperado = partes[1].trim();
+                return verificarMenorIgualQue(premisa, valorEsperado, hechos);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean verificarIgualdad(String premisa, String valorEsperado, List<Hecho> hechos) {
+        for (Hecho hecho : hechos) {
+            if (hecho.getPremisaNombre().equals(premisa)) {
+                String valorHecho = hecho.getValor().toLowerCase().trim();
+                String valorEsp = valorEsperado.toLowerCase().trim();
+
+                // Manejo especial para valores booleanos
+                if (valorEsp.equals("true") || valorEsp.equals("false")) {
+                    return normalizarBooleano(valorHecho).equals(valorEsp);
+                }
+
+                return valorHecho.equals(valorEsp);
+            }
+        }
+        return false;
+    }
+
+    private boolean verificarMayorQue(String premisa, String valorEsperado, List<Hecho> hechos) {
+        return compararNumericamente(premisa, valorEsperado, hechos, ">");
+    }
+
+    private boolean verificarMenorQue(String premisa, String valorEsperado, List<Hecho> hechos) {
+        return compararNumericamente(premisa, valorEsperado, hechos, "<");
+    }
+
+    private boolean verificarMayorIgualQue(String premisa, String valorEsperado, List<Hecho> hechos) {
+        return compararNumericamente(premisa, valorEsperado, hechos, ">=");
+    }
+
+    private boolean verificarMenorIgualQue(String premisa, String valorEsperado, List<Hecho> hechos) {
+        return compararNumericamente(premisa, valorEsperado, hechos, "<=");
+    }
+
+    private boolean compararNumericamente(String premisa, String valorEsperado, List<Hecho> hechos, String operador) {
+        try {
+            double valorNumericoEsperado = Double.parseDouble(valorEsperado);
+
+            for (Hecho hecho : hechos) {
+                if (hecho.getPremisaNombre().equals(premisa)) {
+                    try {
+                        double valorNumericoHecho = Double.parseDouble(hecho.getValor());
+
+                        switch (operador) {
+                            case ">":
+                                return valorNumericoHecho > valorNumericoEsperado;
+                            case "<":
+                                return valorNumericoHecho < valorNumericoEsperado;
+                            case ">=":
+                                return valorNumericoHecho >= valorNumericoEsperado;
+                            case "<=":
+                                return valorNumericoHecho <= valorNumericoEsperado;
+                        }
+                    } catch (NumberFormatException e) {
+                        // El valor del hecho no es numérico
+                        return false;
+                    }
+                }
+            }
+        } catch (NumberFormatException e) {
+            // El valor esperado no es numérico
+            return false;
+        }
+        return false;
+    }
+
+    private String normalizarBooleano(String valor) {
+        valor = valor.toLowerCase().trim();
+        if (valor.equals("sí") || valor.equals("si") || valor.equals("s") || valor.equals("1")) {
+            return "true";
+        } else if (valor.equals("no") || valor.equals("n") || valor.equals("0")) {
+            return "false";
+        }
+        return valor;
     }
 
     public List<String> ejecutarAcciones() {

@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import modelo.entidades.Usuario;
 import vista.formularios.GestorArchivos;
-import vista.comun.InfoSistema;
 
 public class MenuCliente extends JFrame {
     private Usuario usuario;
@@ -38,7 +37,12 @@ public class MenuCliente extends JFrame {
             gestor.setVisible(true);
         });
 
-        JMenuItem itemSalir = new JMenuItem("Salir");
+        JMenuItem itemLogout = new JMenuItem("Cambiar Usuario");
+        itemLogout.addActionListener(e -> {
+            volverAlLogin();
+        });
+
+        JMenuItem itemSalir = new JMenuItem("Salir del Sistema");
         itemSalir.addActionListener(e -> {
             dispose();
             System.exit(0);
@@ -46,6 +50,7 @@ public class MenuCliente extends JFrame {
 
         menuArchivo.add(itemGestorArchivos);
         menuArchivo.addSeparator();
+        menuArchivo.add(itemLogout);
         menuArchivo.add(itemSalir);
 
         // Menú Ayuda
@@ -74,14 +79,9 @@ public class MenuCliente extends JFrame {
                 "Guía de Usuario", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        JMenuItem itemInfoSistema = new JMenuItem("Información del Sistema");
-        itemInfoSistema.addActionListener(e -> {
-            InfoSistema.mostrar(this, usuario);
-        });
 
         menuAyuda.add(itemGuia);
         menuAyuda.addSeparator();
-        menuAyuda.add(itemInfoSistema);
         menuAyuda.add(itemAcercaDe);
 
         menuBar.add(menuArchivo);
@@ -96,25 +96,29 @@ public class MenuCliente extends JFrame {
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 16));
         panelTitulo.add(lblTitulo);
 
-        JPanel panelBotones = new JPanel(new GridLayout(4, 1, 10, 10));
+        JPanel panelBotones = new JPanel(new GridLayout(5, 1, 10, 10));
         panelBotones.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
         btnConsultaExperto = new JButton("Consultar Sistema Experto");
         btnHistorial = new JButton("Ver Historial");
         btnAyuda = new JButton("Ayuda");
-        btnSalir = new JButton("Salir");
+        JButton btnLogout = new JButton("Cambiar Usuario");
+        btnSalir = new JButton("Salir del Sistema");
 
         btnConsultaExperto.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ConsultaExperto(MenuCliente.this, usuario).setVisible(true);
+                setVisible(false);
+                new ConsultaExpertoMejorada(MenuCliente.this, usuario).setVisible(true);
             }
         });
 
         btnHistorial.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new HistorialConsultas(MenuCliente.this, usuario).setVisible(true);
+                JOptionPane.showMessageDialog(MenuCliente.this,
+                    "Funcionalidad de historial temporalmente deshabilitada.",
+                    "Información", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
@@ -133,6 +137,13 @@ public class MenuCliente extends JFrame {
             }
         });
 
+        btnLogout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                volverAlLogin();
+            }
+        });
+
         btnSalir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -144,11 +155,29 @@ public class MenuCliente extends JFrame {
         panelBotones.add(btnConsultaExperto);
         panelBotones.add(btnHistorial);
         panelBotones.add(btnAyuda);
+        panelBotones.add(btnLogout);
         panelBotones.add(btnSalir);
 
         panelPrincipal.add(panelTitulo, BorderLayout.NORTH);
         panelPrincipal.add(panelBotones, BorderLayout.CENTER);
 
         add(panelPrincipal);
+    }
+
+    private void volverAlLogin() {
+        int respuesta = JOptionPane.showConfirmDialog(this,
+            "¿Está seguro de que desea cambiar de usuario?\n" +
+            "Volverá a la pantalla de login.",
+            "Cambiar Usuario",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE);
+
+        if (respuesta == JOptionPane.YES_OPTION) {
+            dispose();
+            SwingUtilities.invokeLater(() -> {
+                vista.login.LoginPrincipal login = new vista.login.LoginPrincipal();
+                login.setVisible(true);
+            });
+        }
     }
 }

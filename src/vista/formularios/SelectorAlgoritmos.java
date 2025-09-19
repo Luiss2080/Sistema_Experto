@@ -58,13 +58,13 @@ public class SelectorAlgoritmos extends JDialog {
 
         // Pestaña 1: Selección de Algoritmo
         crearPanelSeleccion();
-        panelPestanas.addTab("🔧 Selección", crearPanelPrincipal());
+        panelPestanas.addTab("Selección", crearPanelPrincipal());
 
         // Pestaña 2: Comparación de Algoritmos
-        panelPestanas.addTab("📊 Comparación", crearPanelComparacion());
+        panelPestanas.addTab("Comparación", crearPanelComparacion());
 
         // Pestaña 3: Ayuda y Ejemplos
-        panelPestanas.addTab("❓ Ayuda", crearPanelAyuda());
+        panelPestanas.addTab("Ayuda", crearPanelAyuda());
 
         // Panel de botones
         crearPanelBotones();
@@ -188,15 +188,15 @@ public class SelectorAlgoritmos extends JDialog {
         txtRecomendaciones.setFont(new Font("Arial", Font.PLAIN, 12));
         txtRecomendaciones.setText(
             "RECOMENDACIONES DE USO:\n\n" +
-            "🔸 Forward Chaining:\n" +
+            "Forward Chaining:\n" +
             "   • Ideal para diagnósticos médicos\n" +
             "   • Sistemas de clasificación\n" +
             "   • Cuando tienes muchos datos iniciales\n\n" +
-            "🔸 Backward Chaining:\n" +
+            "Backward Chaining:\n" +
             "   • Perfecto para planificación\n" +
             "   • Verificación de hipótesis específicas\n" +
             "   • Cuando buscas objetivos concretos\n\n" +
-            "🔸 Motor Avanzado:\n" +
+            "Motor Avanzado:\n" +
             "   • Análisis complejos que requieren múltiples enfoques\n" +
             "   • Sistemas que necesitan explicaciones detalladas\n" +
             "   • Cuando la certeza es crítica"
@@ -534,13 +534,13 @@ public class SelectorAlgoritmos extends JDialog {
 
     private void mostrarAyudaRapida() {
         String ayuda = "SELECCIÓN RÁPIDA:\n\n" +
-                      "🔸 ¿Tienes muchos datos y quieres ver qué puedes concluir?\n" +
+                      "¿Tienes muchos datos y quieres ver qué puedes concluir?\n" +
                       "   → Forward Chaining + Amplitud\n\n" +
-                      "🔸 ¿Quieres verificar si algo específico es cierto?\n" +
+                      "¿Quieres verificar si algo específico es cierto?\n" +
                       "   → Backward Chaining + Profundidad\n\n" +
-                      "🔸 ¿Necesitas el análisis más completo posible?\n" +
+                      "¿Necesitas el análisis más completo posible?\n" +
                       "   → Motor Avanzado + Factor de Certeza\n\n" +
-                      "🔸 ¿Las reglas tienen diferentes niveles de importancia?\n" +
+                      "¿Las reglas tienen diferentes niveles de importancia?\n" +
                       "   → Cualquier algoritmo + Prioridad de Reglas";
 
         JOptionPane.showMessageDialog(this, ayuda, "Ayuda Rápida", JOptionPane.INFORMATION_MESSAGE);

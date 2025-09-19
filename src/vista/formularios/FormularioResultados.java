@@ -76,19 +76,19 @@ public class FormularioResultados extends JDialog {
 
         // Pestaña 1: Resumen
         crearPanelResumen();
-        panelPestanas.addTab("📊 Resumen", panelResumen);
+        panelPestanas.addTab("Resumen", panelResumen);
 
         // Pestaña 2: Explicación Detallada
         crearPanelExplicacion();
-        panelPestanas.addTab("📝 Explicación", panelExplicacion);
+        panelPestanas.addTab("Explicación", panelExplicacion);
 
         // Pestaña 3: Pasos de Inferencia
         crearPanelPasos();
-        panelPestanas.addTab("🔍 Pasos", panelPasos);
+        panelPestanas.addTab("Pasos", panelPasos);
 
         // Pestaña 4: Visualización Gráfica
         crearPanelGrafico();
-        panelPestanas.addTab("📈 Gráfico", panelGrafico);
+        panelPestanas.addTab("Gráfico", panelGrafico);
 
         // Panel de botones
         crearPanelBotones();
@@ -280,42 +280,21 @@ public class FormularioResultados extends JDialog {
         panelBotones = new JPanel(new FlowLayout());
 
         btnExportar = new JButton("Exportar Resultados");
-        btnExportar.setIcon(createIcon("📄", Color.BLUE));
         btnExportar.addActionListener(e -> exportarResultados());
 
         btnImprimir = new JButton("Imprimir");
-        btnImprimir.setIcon(createIcon("🖨", Color.GREEN));
         btnImprimir.addActionListener(e -> imprimirResultados());
 
         btnNuevoAnalisis = new JButton("Nuevo Análisis");
-        btnNuevoAnalisis.setIcon(createIcon("🔄", Color.ORANGE));
         btnNuevoAnalisis.addActionListener(e -> nuevoAnalisis());
 
         btnCerrar = new JButton("Cerrar");
-        btnCerrar.setIcon(createIcon("✗", Color.RED));
         btnCerrar.addActionListener(e -> dispose());
 
         panelBotones.add(btnExportar);
         panelBotones.add(btnImprimir);
         panelBotones.add(btnNuevoAnalisis);
         panelBotones.add(btnCerrar);
-    }
-
-    private Icon createIcon(String text, Color color) {
-        return new Icon() {
-            @Override
-            public void paintIcon(Component c, Graphics g, int x, int y) {
-                g.setColor(color);
-                g.setFont(new Font("Arial", Font.BOLD, 12));
-                g.drawString(text, x, y + 10);
-            }
-
-            @Override
-            public int getIconWidth() { return 20; }
-
-            @Override
-            public int getIconHeight() { return 15; }
-        };
     }
 
     private void cargarDatos() {
